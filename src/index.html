@@ -10,19 +10,38 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/4.2.0/firebaseui.css" />
+<script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+<link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
 
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+
+<!--
+
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-firestore.js"></script>
+
+
+<script type="text/javascript">
+const firebaseConfig = {
+  apiKey: "AIzaSyC7KRPdXjqQIhNKhcY_98vrkfQZyU2gHIw",
+  authDomain: "neighbor-f6e69.firebaseapp.com",
+  databaseURL: "https://neighbor-f6e69.firebaseio.com",
+  projectId: "neighbor-f6e69",
+  storageBucket: "neighbor-f6e69.appspot.com",
+  messagingSenderId: "681260542654",
+  appId: "1:681260542654:web:855c159cf7f86a8bf40cef"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+</script>
+
+-->
 
 <script src="https://apis.google.com/js/platform.js" async defer></script>
-
-<script>
-function signOut() {
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signOut().then(function () {
-      console.log('User signed out.');
-    });
-  }
-</script>
 
 
 

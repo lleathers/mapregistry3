@@ -22,7 +22,6 @@
     "@angular/router": "~8.2.12",
     "firebase": "^7.5.0",
     "firebaseui": "^4.3.0",
-    "firebaseui-angular": "^4.0.1",
     "geofirex": "0.0.6",
     "mapbox-gl": "^1.5.0",
     "rxjs": "^6.4.0",
@@ -48,6 +47,11 @@
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
-    "typescript": "~3.5.3"
+    "typescript": "~3.5.3",
+    "@angular-devkit/architect": "<0.900 || ^0.900.0-0 || ^9.0.0-0",
+    "firebase-tools": "^6.10.0",
+    "fuzzy": "^0.1.3",
+    "inquirer": "^6.2.2",
+    "inquirer-autocomplete-prompt": "^1.0.1"
   }
 }

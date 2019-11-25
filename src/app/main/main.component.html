@@ -1,3 +1,4 @@
+
 <!--
 <div id="message" *ngIf="!dismissDialogToIcon">
 -->
@@ -124,15 +125,23 @@
 <submit-form></submit-form>
 -->
 
+<div id="firebaseui-auth-container"></div>
+
+<!--
+Callbacks and uiShown --PUT LOADING INDICATOR LOGIC HERE
+<div id="loader">Loading...</div>
+-->
+
+
+<!--
 <firebase-ui (signInSuccessWithAuthResult)="successCallback($event)"
              (signInFailure)="errorCallback($event)"></firebase-ui>
+-->
+
 <button (click)="logout()">Logout</button>
 
 <button [routerLink]="['/page']">Touch to search</button>
 
-<!-- COMMENT OUT DEBUGGING for "Naive Routing"
-<button [routerLink]="['/page']">To second page</button>
--->
 
 <!--
 </main>

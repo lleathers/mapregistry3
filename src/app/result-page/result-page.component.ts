@@ -1,8 +1,6 @@
-// from Raphael Jenni -- FirebaseUI-Angular
 
 import { Component, OnInit } from '@angular/core';
 import {AngularFireAuth} from '@angular/fire/auth';
-import {FirebaseUISignInSuccessWithAuthResult} from 'firebaseui-angular';
 
 
 @Component({
@@ -16,16 +14,18 @@ export class ResultPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.afAuth.authState.subscribe(d => console.log(d));
+    //this.afAuth.authState.subscribe(d => console.log(d));
   }
 
   logout() {
-    this.afAuth.auth.signOut();
+    //this.afAuth.auth.signOut();
   }
 
+/*
   successCallback(data: FirebaseUISignInSuccessWithAuthResult) {
     console.log(data);
   }
+*/
 
   // Logic for dismissing and recovering form for map interaction
   dismissDialogToIcon: boolean = false;

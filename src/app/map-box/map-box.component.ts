@@ -5,29 +5,13 @@ import { GeoJson, FeatureCollection } from '../map';
 import { Observable, from } from 'rxjs';
 
 import { Router } from '@angular/router';
-import { firebase } from 'firebaseui-angular';
+
+import * as firebase from 'firebase/app';
 
 // Init GeoFireX
 import * as geofirex from 'geofirex';
 
 import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
-
-/*
-const yourFirebaseConfig = {
-  apiKey: "AIzaSyC7KRPdXjqQIhNKhcY_98vrkfQZyU2gHIw",
-  authDomain: "neighbor-f6e69.firebaseapp.com",
-  databaseURL: "https://neighbor-f6e69.firebaseio.com",
-  projectId: "neighbor-f6e69",
-  storageBucket: "neighbor-f6e69.appspot.com",
-  messagingSenderId: "681260542654"
-};
-import * as firebase from 'firebase/app';
-var app = firebase.initializeApp(yourFirebaseConfig);
-*/
-
-
-
-export interface Peaches { name: string; }
 
 
 @Component({
@@ -470,21 +454,6 @@ export class MapBoxComponent implements OnInit{
      var makeArray = [TESTMarker]
 
 
-/*
-     this.markermonster.subscribe(markers => {
-        console.log("MARKERS AGAIN PLEASE:", markers);
-        let data = new FeatureCollection(markers)
-        this.source.setData(data)
-     })
-*/
-
-/*
-     this.markers.subscribe(markers => {
-        console.log("MARKERS AGAIN PLEASE:", makeArray);
-        let data = new FeatureCollection(makeArray)
-        this.source.setData(data)
-     })
-*/
 
      this.markers.subscribe(markers => {
         console.log("MARKERS AGAIN PLEASE:", markers);
@@ -492,12 +461,6 @@ export class MapBoxComponent implements OnInit{
         this.source.setData(data)
      })
 
-/*
-      this.markers.subscribe(markers => {
-          let data = new FeatureCollection(markers)
-          this.source.setData(data)
-      })
-*/
 
       /// create map layers with realtime data
       this.map.addLayer({
