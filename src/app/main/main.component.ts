@@ -46,7 +46,7 @@ export class MainComponent implements OnInit {
             // Do something with the returned AuthResult.
             // Return type determines whether we continue the redirect automatically
             // or whether we leave that to developer to handle.
-            console.log('successCallback', authResult);
+            console.log('successCallback1', authResult);
             //this.router.navigate(['page']);
             successCallback(authResult);
             return true;
@@ -54,7 +54,7 @@ export class MainComponent implements OnInit {
     // signInFailure callback must be provided to handle merge conflicts which
     // occur when an existing credential is linked to an anonymous user.
          signInFailure: function(error) {
-          this.afs = firebase.firestore 
+          let afs: any = firebase.firestore() 
           // For merge conflicts, the error.code will be
           // 'firebaseui/anonymous-upgrade-merge-conflict'.
           if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
@@ -67,8 +67,10 @@ export class MainComponent implements OnInit {
           var fs = firebase.firestore;
           // Save anonymous user data first.
           let data = null;
-          return this.afs.doc('users/' + firebase.auth().currentUser.uid)
-              .onSnapshot(function(value) { return value })
+          return afs.doc('users/' + firebase.auth().currentUser.uid)
+              .onSnapshot(value => { 
+                   console.log("What is VALUE?", value)
+                   return value })
               .next((snapshot) => {
                 this.data = snapshot;
                 // This will trigger onAuthStateChanged listener which
@@ -105,8 +107,8 @@ export class MainComponent implements OnInit {
         // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
         signInFlow: 'popup',
         autoUpgradeAnonymousUsers: true,
-        //signInSuccessUrl: 'https://neighbors.deliverhealthy.com',
-        signInSuccessUrl: 'http://localhost:4201/page',
+        signInSuccessUrl: 'https://neighbors.deliverhealthy.com',
+        //signInSuccessUrl: 'http://localhost:4201/page',
         signInOptions: [
           // Leave the lines as is for the providers you want to offer your users.
           firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -129,7 +131,7 @@ export class MainComponent implements OnInit {
 
 
       function successCallback(data: any) {
-        console.log('successCallback', data);
+        console.log('successCallback2', data);
         therouter.navigate(['page']);
       }
 
@@ -141,10 +143,12 @@ export class MainComponent implements OnInit {
     location.reload(true);
   };
 
+/*
   successCallback(data: any) {
     console.log('successCallback', data);
     this.router.navigate(['page']);
   };
+*/
 
 /*
   errorCallback(data: FirebaseUISignInFailure) {
