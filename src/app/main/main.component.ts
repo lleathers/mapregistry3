@@ -33,7 +33,7 @@ export class MainComponent implements OnInit {
   ngOnInit() {
 
    let therouter = this.router;
-   let theafs = this.afs;
+   //let theafs = this.afs;
 
    var uiConfig = {
         callbacks: {
@@ -54,6 +54,7 @@ export class MainComponent implements OnInit {
     // signInFailure callback must be provided to handle merge conflicts which
     // occur when an existing credential is linked to an anonymous user.
          signInFailure: function(error) {
+          this.afs = firebase.firestore 
           // For merge conflicts, the error.code will be
           // 'firebaseui/anonymous-upgrade-merge-conflict'.
           if (error.code != 'firebaseui/anonymous-upgrade-merge-conflict') {
