@@ -125,8 +125,8 @@ export class MainComponent implements OnInit {
         // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
         signInFlow: 'popup',
         autoUpgradeAnonymousUsers: true,
-        //signInSuccessUrl: 'https://neighbors.deliverhealthy.com',
-        signInSuccessUrl: 'http://localhost:4201/page',
+        signInSuccessUrl: 'https://neighbors.deliverhealthy.com/page',
+        //signInSuccessUrl: 'http://localhost:4201/page',
         signInOptions: [
           // Leave the lines as is for the providers you want to offer your users.
           firebase.auth.GoogleAuthProvider.PROVIDER_ID,
