@@ -21,15 +21,67 @@ export class MapService {
         mapboxgl.accessToken = environment.mapbox.accessToken
         this.markersCollection = db.collection<GeoJson>('users')
         this.markers = this.markersCollection.valueChanges()
-    }
+    };
 
+/*
+    const isUserAnonymous = 
+      function(this:void): boolean {
+       firebase.auth().onAuthStateChanged(function(checkuser) {
+         if (checkuser) {
+           //return checkuser.isAnonymous
+           return true 
+         } else {
+           return true
+         }
+         return true
+       })
+    };
+     
+    const whatisUserid =
+      function(this:void): string {
+       firebase.auth().onAuthStateChanged(function(checkuser) {
+         return checkuser.uid
+         })
+    };
+
+    createMarker(data: GeoJson): void {
+       if (this.isUserAnonymous == false) {
+        var id = this.whatisUserid()
+
+        console.log("INVESTIGATE USERID:", id)
+
+        const marker = Object.assign({}, data)
+        this.markersCollection.doc(id).set(marker)
+       } else {
+         console.log("User is Anonymous") 
+       }
+    }; 
+*/
+
+    /// Add marker routine
+    createMarker(data: GeoJson) {
+        const theMarkers = this.markersCollection
+        firebase.auth().onAuthStateChanged(function(checkuser) {
+          if (checkuser) {
+            var isAnonymous = checkuser.isAnonymous
+              if (!isAnonymous) {
+                var id = checkuser.uid
+	        const marker = Object.assign({}, data) 
+	        theMarkers.doc(id).set(marker)
+	        } else {
+                  console.log("User is Anonymous")
+                }
+            }
+       })
+     } 
+
+/*
     /// Add marker routine
     createMarker(data: GeoJson) {
         var id = this.afAuth.auth.currentUser.uid
 	const marker = Object.assign({}, data) 
 	this.markersCollection.doc(id).set(marker)
 	}
-
 
     ///TESTING PURPOSES ONLY--ACHTUNG! WE ARE PRINTING ALL USERS!!!
 

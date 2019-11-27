@@ -64,14 +64,32 @@ export class MainComponent implements OnInit {
           var cred = error.credential;
           // If using Firebase Realtime Database. The anonymous user data has to be
           // copied to the non-anonymous user.
-          var fs = firebase.firestore;
+
+          console.log("What is THIS CRED???", cred)
+
+/*
+          firebase.auth().onAuthStateChanged(function(checkuser) {
+             if (checkuser) {
+                 var isAnonymous = checkuser.isAnonymous
+                   if (isAnonymous) {
+                      console.log("USER IS ANONYMOUS")
+                      console.log("ANON USERID:", checkuser.uid)
+                      } else {
+                      console.log("USER IS KNOWN") 
+                      }
+                }
+             })
+
+          let curUser = firebase.auth().currentUser.uid
+          console.log("Who is THIS USER???", curUser)
+*/
           // Save anonymous user data first.
           let data = null;
-          return afs.doc('users/' + firebase.auth().currentUser.uid)
+          afs.doc('users/' + firebase.auth().currentUser.uid)
               .onSnapshot(value => { 
                    console.log("What is VALUE?", value)
                    return value })
-              .next((snapshot) => {
+              .next(snapshot => {
                 this.data = snapshot;
                 // This will trigger onAuthStateChanged listener which
                 // could trigger a redirect to another page.
@@ -107,8 +125,8 @@ export class MainComponent implements OnInit {
         // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
         signInFlow: 'popup',
         autoUpgradeAnonymousUsers: true,
-        signInSuccessUrl: 'https://neighbors.deliverhealthy.com',
-        //signInSuccessUrl: 'http://localhost:4201/page',
+        //signInSuccessUrl: 'https://neighbors.deliverhealthy.com',
+        signInSuccessUrl: 'http://localhost:4201/page',
         signInOptions: [
           // Leave the lines as is for the providers you want to offer your users.
           firebase.auth.GoogleAuthProvider.PROVIDER_ID,
