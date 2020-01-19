@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
 import { MapService } from '../map.service';
+import { PartitionService } from '../partition.service';
 import { GeoJson, FeatureCollection } from '../map';
 import { Observable, from } from 'rxjs';
 
@@ -10,8 +11,13 @@ import * as firebase from 'firebase/app';
 
 // Init GeoFireX
 import * as geofirex from 'geofirex';
+const geo = geofirex.init(firebase);
 
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
+import { get } from 'geofirex';
+
+import { GeoFireClient } from 'geofirex';
+
+import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 
 
 @Component({
@@ -21,16 +27,20 @@ import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firest
 })
 export class MapBoxComponent implements OnInit{
 
-  geo = geofirex.init(firebase)
+    constructor(private afs: AngularFirestore, private mapService: MapService, public partitionService: PartitionService, private router: Router) {
+    }
+
+  //geo = geofirex.init(firebase)
+
 
   latlngtext: any;
   user: any;
-  usr: any;
   markerpoint: any;
   hashpoint: any;
   neighborhood: any;
   initHash: any;
   thecoordinates: number[];
+  timeNow: any;
 
   map: mapboxgl.Map;
   style = 'mapbox://styles/mapbox/outdoors-v9';
@@ -43,26 +53,18 @@ export class MapBoxComponent implements OnInit{
   x = 0;
 
 
- db = firebase.firestore();
- findUser = this.db.collection('users');
+  db = firebase.firestore();
 
- arraytestmarker: any;
-
- //thecoordinates: number[]; 
-  
- //dbuser = firebase.auth().user.uid;
- //dbuser = user.uid
-
- //userLastSeen = this.db.collection('users').doc('Y3BA83d7AINX008RH0HcEDSVxpw2');
-
- //userLastSeen = this.db.collection('users').doc(this.dbuser);
+  thesepart: any;
 
   //
   // from angularfirebase and geofirex tutorial
   //
   updateUserLocation(id) {
    var ourMapService = this.mapService;
+   var ourPartitionService = this.partitionService;
    var ourcoordinates = this.thecoordinates;
+
 
    // We check last location of user.
    // If most significant six digits of geohash are 
@@ -70,24 +72,33 @@ export class MapBoxComponent implements OnInit{
    // neighborhood. 
  
    var ourneighborhood = this.neighborhood;
-   var ourgeocollection = this.geo.collection('users');
+   var ourgeocollection = geo.collection('users');
    var ourmarkerpoint = this.markerpoint;
 
- 
-   //var userLastSeen = this.db.collection('users').doc('Y3BA83d7AINX008RH0HcEDSVxpw2');
 
+
+  // print out everything in neighborhood.
+
+   //const query = this.db.collection('places').doc('dr5rj');
+   //this.points = query.pipe( toGeoJSON() );
+
+   //console.log("PRINT out geoRef", geoRef);
+
+ 
    // We check last marker location saved in User account
    // to assess whether or not in same neighborhood defined by
    // geohash. If left neighborhood, we delete marker location in 'places'.
 
    var userLastSeen = this.db.collection('users').doc(this.user.uid);
-   //var lastMarkerCollection = this.db.collection('places');
+
+   const theafs = this.afs;
 
    const userRef = this.user.uid;
    const dbRef = this.db;
- 
-   // var lastMarkerDocument = this.db.collection('places').doc(this.user.uid);
+   var timeRef = this.timeNow;
 
+   const mapRef = this.map;
+ 
    userLastSeen.get().then(function(collection2) {
        if (collection2.exists) {
           console.log("Document data:", collection2.data());
@@ -112,38 +123,13 @@ export class MapBoxComponent implements OnInit{
              console.log('New neighborhood. Delete old location.'); 
 
              // Let's delete old location in 'places'
-             // lastMarkerCollection.doc(geohashlast_msd) 
-            
-            var lastMarkerDocument = dbRef.collection('places').doc(geohashlast_msd);
-
-/*
-            var removePosition = lastMarkerDocument.update({
-             Y3BA83d7AINX008RH0HcEDSVxpw2: firebase.firestore.FieldValue.delete()  
-                 }).then(function() {
-                     console.log("Document successfully deleted!");
-                 }).catch(function(error) {
-                     console.error("Error removing document: ", error);
-                 });
-*/
-
+             var lastMarkerDocument = dbRef.collection('places').doc(geohashlast_msd);
+             var lastMarkerDocument0 = theafs.collection('neighborhoods').doc(geohashlast_msd).collection(geohashlast_msd).doc(userRef);
 
 // THIS IS ROUTE TO THE SOLUTION
 //
 // LESSON TO BE LEARNED: use '[5lkrtkljelkrjt]' to refer to field names that begin with numbers!!!
 //
-/*
-           var integrate =  lastMarkerDocument.update({ 
-              ['5tfmcbY0EJg4o4vWzTEsWMPCyBU2'] : firebase.firestore.FieldValue.delete() 
-             // tfmcb: firebase.firestore.FieldValue.delete() 
-                }).then(function() { 
-                   console.log(`Document successfully deleted!`); 
-                }).catch(function(error) {  
-                   console.error(`Error removing document: `, error); 
-                });
-           console.log(integrate);
-*/
-
-
 
            const executeFirebase = firebase.firestore.FieldValue.delete()
 
@@ -158,26 +144,112 @@ export class MapBoxComponent implements OnInit{
 
            console.log(integrate);
            eval(integrate);
-       
-       
+
+
+           // Delete from neighborhoods
+           lastMarkerDocument0.delete().then(function() {
+               console.log("Document successfully deleted!");
+           }).catch(function(error) {
+               console.error("Error removing document: ", error);
+           });
+
+ 
            // The Javascript referred to a database field without using quotes. I wanted to refer
            // to Firestore field through a variable reference. That is why this eval scheme was hatched.
+
+// NOW UNSUBSCRIBE to geohashlast and SUBSCRIBE to ourneighborhood         
+//
+//
+//
+           // Simply update subscription to new restricted domain required for map-box 
+           // to plot markers
+           // updatesubscription(geohashlast_msd, ourneighborhood);       
+
+
+          const nextPartition: string = ourneighborhood + "/" + ourneighborhood;
+
+          //const integrate1: string = "theafs.collection<aGeoJson>('neighborhoods/" + eval('nextPartition') + "')"
+          //console.log("ourPartitionService.partitionCollection = ", integrate1)
+
+          //ourPartitionService.partitionsCollection = eval(integrate1) as unknown as AngularFirestoreCollection<GeoJson>; 
+          //ourPartitionService.partitionsCollection = eval(integrate1);  
+          //console.log("PRINT OUT partitionsCollection:", ourPartitionService.partitionsCollection);
+
+/*
+           const integrate1: string = 
+               "ourPartitionService.partitionsCollection = theafs.collection" + "('neighborhoods/" + eval('nextPartition') +  "') as AngularFirestoreCollection<GeoJson>;"
+*/
+
+/*
+           const integrate1: string = 
+               "ourPartitionService.partitionsCollection = theafs.collection<GeoJson>('neighborhoods/" + eval('nextPartition') + "');"
+
+           console.log(integrate1);
+           eval(integrate1);
+*/
+
+
+          // LITERAL TEST
+          //ourPartitionService.partitionsCollection = dbRef.collection('neighborhoods/dr5qg/dr5qg') as AngularFirestoreCollection<GeoJson>;
+          eval("ourPartitionService.partitionsCollection = theafs.collection('neighborhoods/" + nextPartition + "')");
+          console.log("partitionsCollection assignment worked: ", ourPartitionService.partitionsCollection);
+          
+
+
+
+          //eval(integrate1).then(response => { ourPartitionService.partitions = response.valueChanges() });
+           
+          ourPartitionService.partitions = ourPartitionService.partitionsCollection.valueChanges();
+          var thepartitions = ourPartitionService.partitions
+
+          // Now update the marker subscription to the new partition 
+          // OK. Use this because we are calling a function from inside another, and both functions are in same class.
+          // And this is strict mode! Whew!
+          // () => this.updateSubscription();
+
+
+
+         //UPDATE MARKER NEIGHBORHOOD SUBSCRIPTION!!!
+         //Must update marker subscriptions because partitions change
+         //Call this updateSubscription, because that is what this does
+         //IMPORTANT!!!
+         //THIS IS THE CODE THAT ENABLES US TO LIMIT OR RESTRICT QUERY ACTIVITY TO THE NEIGHBORHOOD OF USER PUBLISHED MARKER.
+         //WITHOUT THIS, PERFORMANCE WILL DEGRADE AS USERS LOAD THE APPLICATION.
+ 
+         thepartitions.subscribe(thepartitions => {
+           console.log("MARKERS AGAIN PLEASE:", thepartitions);
+           let source = mapRef.getSource('firebase');
+           let data = new FeatureCollection(thepartitions);
+           source.setData(data);
+           })
+ 
+
+          console.log("partitions assignment worked");
 
           }
 
         // Now update the user location data.
         const collection = ourgeocollection;
         const lastseen = ourmarkerpoint;
+ 
+        // Timestamp can only be coerced into string by converting to unknown, then to string.
+        // Therefore, consider <type><unknown>(: Timestamp) format below.
+        // timeRef = <string><unknown>firebase.firestore.Timestamp.now();
+        // Fortunately, Timestamp does not need to be converted. Firebase recognizes and stores it accordingly.
+
+        timeRef = firebase.firestore.Timestamp.now();
 
         // GeoJson mediates 'users' collection, now
-        var newMarker1 = new GeoJson(ourcoordinates, { message: "hello, there", geohash: ourmarkerpoint.hash, 
-                                presence: "available", username: "default" })
+        var newMarker1 = new GeoJson(ourcoordinates, { message: "You're Here", geohash: ourmarkerpoint.hash, 
+                                presence: "available", username: "default", timestamp: timeRef, userid: userRef })
 
 
 
 ///TESTING to understand what form Firestore can understand
         console.log("PLEASE SHARE GEOJSON:", newMarker1)
         ourMapService.createMarker(newMarker1)
+        ourPartitionService.createMarker(newMarker1)
+        
  
         //  collection.setDoc(id, {position: lastseen.data});
         console.log("Newest neighborhood", ourmarkerpoint.hash);
@@ -189,10 +261,20 @@ export class MapBoxComponent implements OnInit{
   
         const collection = ourgeocollection;
         const lastseen = ourmarkerpoint;
+
+        // Timestamp can only be coerced into string by converting to unknown, then to string.
+        // Therefore, consider <type><unknown>(: Timestamp) format below.
+        // timeRef = <string><unknown>firebase.firestore.Timestamp.now();
+        // Fortunately, Timestamp does not need to be converted. Firebase recognizes and stores it accordingly.
+
+        timeRef = firebase.firestore.Timestamp.now();
  
         // GeoJson mediates 'users' collection, now
-        var newMarker2 = new GeoJson(ourcoordinates, { message: "hello, there", geohash: ourmarkerpoint.hash })
+        var newMarker2 = new GeoJson(ourcoordinates, { message: "You're Here", geohash: ourmarkerpoint.hash,
+                                presence: "available", username: "default", timestamp: timeRef, userid: userRef })
+                                
         ourMapService.createMarker(newMarker2)
+        ourPartitionService.createMarker(newMarker2)  
 
         //  collection.setDoc(id, {position: lastseen.data});
         console.log("Newest neighborhood", ourmarkerpoint.hash);
@@ -226,7 +308,7 @@ export class MapBoxComponent implements OnInit{
 
 
   createPoint(thelat, thelng, theuserid) {
-    var collection = this.geo.collection('places');
+    var collection = geo.collection('places');
 
     //const field = 'position'
 
@@ -262,75 +344,23 @@ export class MapBoxComponent implements OnInit{
   // data
   source: any;
   markers: any;
-
-  markermonster: any;
-
-
-  constructor(private mapService: MapService, private router: Router) {
-  }
-
-  //markermonster = from(this.mapService.getMarkers);
+  partitions: any;
 
 
   ngOnInit() {
-   const toMapService = this.mapService  
-   const toFindUser = this.findUser
-   //toMarkers: Array<GeoJson>
+     const toMapService = this.mapService  
+     var toPartitionService = this.partitionService
 
-   firebase.auth().onAuthStateChanged(function(user) {
-      this.usr = user;
-   })
-
-// Notice that assignment to this.markers occurs before return from getMarkers!!!
-// This is why you coerce assignment after return from getMarkers
-//   console.log("FROM GETMARKERS:", this.markers = this.mapService.getMarkers())
-
-
-
-   //We have the markers observable
-   //Now everyone can subscribe to marker changes
-   this.markers = toMapService.markers
-   
+     //We have the markers observable
+     //Now everyone can subscribe to marker changes
+     this.markers = toMapService.markers
+     this.partitions = toPartitionService.partitions
  
-/* 
-   var initHash: string = "";
-   var whatMapService = this.mapService
-   var markersorigin = this.markers;
+     //We ensure query response is restricted to local neighborhood. 
+       const firestoreRef = this.db.collection('places').doc('dr5rj');
+       //const geoRef = geo.query(firestoreRef); 
  
-    firebase.auth().onAuthStateChanged(function(user) {
-         this.usr = user;
-         const hashRef: string = "";
-         var tothemarkers: GeoJson[] 
-         console.log("Who is currentUser? ", this.usr.uid);
-         var locationRef = toFindUser.doc(this.usr.uid);
-         this.markersorigin = tothemarkers;
-         locationRef.get().then((documentSnapshot) => {
-               if (documentSnapshot.exists) {
-                 console.log(`Document found with name '${documentSnapshot.id}'`);
- 
-                 let fieldHash = documentSnapshot.get('properties.geohash');
-                 console.log(`Retrieved field value: ${fieldHash}`);
-                 let hiFieldHash = fieldHash.substring(0, 5);
-                 this.hashRef = hiFieldHash;
-                 console.log(`Retrieved HASH domain: ${this.hashRef}`);
-                 this.tothemarkers = whatMapService.getMarkers(this.hashRef);
-                 console.log("MARKERS PLEASE:", this.tothemarkers);
-                 
-               };
-         }); 
-         // this.markers = whatMapService.getMarkers(hashRef); 
-         // this.initHash = hashRef;         
-    });
- 
-    //this.markers = this.mapService.getMarkers(initHash);
- 
-    //var locationLast = this.db.collection('users').doc(this.usr.uid);
-    //var lastHash = locationLast.get(position);
-    //console.log("This is initial geohash: ", lastHash);
-    // var hiLastHash = lastHash.substring(0, 5);
- */   
- 
-    this.initializeMap()
+     this.initializeMap()
   }
 
   private initializeMap() {
@@ -349,6 +379,8 @@ export class MapBoxComponent implements OnInit{
 
   }
 
+
+
   buildMap() {
     this.map = new mapboxgl.Map({
       container: 'map',
@@ -363,18 +395,17 @@ export class MapBoxComponent implements OnInit{
 
 
     //// Add Marker on Click
-//    this.map.on('click', (event) => {
-//      const coordinates = [event.lngLat.lng, event.lngLat.lat]
-//      const newMarker   = new GeoJson(coordinates, { message: this.message })
-//      this.mapService.createMarker(newMarker)
-//    })
-
     this.map.on('click', (event) => {
       var coordinates = [event.lngLat.lng, event.lngLat.lat]
       this.thecoordinates = coordinates
 
-      this.markerpoint = this.geo.point(event.lngLat.lat, event.lngLat.lng)
-      
+      this.markerpoint = geo.point(event.lngLat.lat, event.lngLat.lng)
+     
+      //Why are query and distance inaccessible?
+        //const exist = geo.query(this.db.collection('places'))
+        //const exist1 = geo.distance(this.markerpoint, this.markerpoint)
+
+ 
       // Now connecting from Firestore to markers!!
 
       //const newMarker   = new GeoJson(coordinates, { message: this.message })
@@ -415,9 +446,7 @@ export class MapBoxComponent implements OnInit{
       // update User account with new marker
       // location.
 
-
       this.updateUserLocation(this.user.uid)
-
 
       // adds location to Firestore using GeoFireX
       this.addLocation()
@@ -445,7 +474,6 @@ export class MapBoxComponent implements OnInit{
 
       /// subscribe to realtime database and set data source
 
-     // console.log("ARRAYTESTMARKER:", this.arraytestmarker)
 
 //TESTING for interface with MapBox API
      var TESTMarker = new GeoJson([-73.9237405202382, 40.61766398344872], { message: "hello, there", geohash: "dr5rhg97w", 
@@ -453,13 +481,29 @@ export class MapBoxComponent implements OnInit{
 
      var makeArray = [TESTMarker]
 
-
-
+/*
      this.markers.subscribe(markers => {
         console.log("MARKERS AGAIN PLEASE:", markers);
         let data = new FeatureCollection(markers)
         this.source.setData(data)
      })
+*/
+
+     this.partitionService.partitions.subscribe(partitions => {
+        console.log("MARKERS AGAIN PLEASE:", partitions);
+        let data = new FeatureCollection(partitions)
+        this.source.setData(data)
+     })
+
+
+     // console.log("MARKERS1 PRINT HERE:", this.markers1);
+
+
+//     this.markers1.subscribe(markers1 => {
+//        console.log("MARKERS1 AGAIN PLEASE:", markers1);
+//        let data = new FeatureCollection(markers1)
+//        this.source.setData(data)
+//     })
 
 
       /// create map layers with realtime data

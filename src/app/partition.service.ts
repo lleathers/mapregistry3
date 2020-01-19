@@ -7,21 +7,22 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { auth } from 'firebase/app';
 import * as firebase from 'firebase/app';
 
+//import { MapBoxComponent } from './map-box/map-box.component';
+
 import { GeoJson } from './map';
 import * as mapboxgl from 'mapbox-gl';
 
 
 @Injectable()
-export class MapService {
+export class PartitionService {
 
-    private markersCollection: AngularFirestoreCollection<GeoJson>;
-    markers: Observable<GeoJson[]>;
-
+    public partitionsCollection: AngularFirestoreCollection<GeoJson>;
+    partitions: Observable<GeoJson[]>;
 
     constructor(private db: AngularFirestore, public afAuth: AngularFireAuth) {
         mapboxgl.accessToken = environment.mapbox.accessToken
-        this.markersCollection = db.collection<GeoJson>('users')
-        this.markers = this.markersCollection.valueChanges()
+        this.partitionsCollection = db.collection<any>('neighborhoods/init/init')
+        this.partitions = this.partitionsCollection.valueChanges()
     };
 
 
@@ -29,7 +30,7 @@ export class MapService {
     /// Each user is authorized to manage the location of only one marker.
 
     createMarker(data: GeoJson) {
-        const theMarkers = this.markersCollection
+        var theMarkers = this.partitionsCollection
         firebase.auth().onAuthStateChanged(function(checkuser) {
           if (checkuser) {
             var isAnonymous = checkuser.isAnonymous

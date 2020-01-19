@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { MapBoxComponent } from './map-box/map-box.component';
 import { MapService } from './map.service';
+import { PartitionService } from './partition.service';
 
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 
@@ -43,7 +44,7 @@ import { AppRoutingModule } from './app-routing.module';
     AngularFirestoreModule,
     AppRoutingModule
   ],
-  providers: [MapService],
+  providers: [MapService, PartitionService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
