@@ -137,9 +137,9 @@ export class MapBoxComponent implements OnInit{
                " lastMarkerDocument.update({ ['" + eval('userRef') + 
                "'] : executeFirebase" +  
                " }).then(function() { " +
-               "    console.log(`Document successfully deleted!`);" +
+               "    console.log(`Document successfully deleted from places!`);" +
                " }).catch(function(error) { " +
-               "    console.error(`Error removing document: `, error);" +
+               "    console.error(`Error removing document from places: `, error);" +
                " });"
 
            console.log(integrate);
@@ -148,9 +148,9 @@ export class MapBoxComponent implements OnInit{
 
            // Delete from neighborhoods
            lastMarkerDocument0.delete().then(function() {
-               console.log("Document successfully deleted!");
+               console.log("Document successfully deleted from neighborhoods!");
            }).catch(function(error) {
-               console.error("Error removing document: ", error);
+               console.error("Error removing document from neighborhoods: ", error);
            });
 
  
@@ -357,7 +357,7 @@ export class MapBoxComponent implements OnInit{
      this.partitions = toPartitionService.partitions
  
      //We ensure query response is restricted to local neighborhood. 
-       const firestoreRef = this.db.collection('places').doc('dr5rj');
+       //const firestoreRef = this.db.collection('places').doc('dr5rj');
        //const geoRef = geo.query(firestoreRef); 
  
      this.initializeMap()

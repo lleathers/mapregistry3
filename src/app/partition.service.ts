@@ -17,7 +17,7 @@ import * as mapboxgl from 'mapbox-gl';
 export class PartitionService {
 
     public partitionsCollection: AngularFirestoreCollection<GeoJson>;
-    partitions: Observable<GeoJson[]>;
+    public partitions: Observable<GeoJson[]>;
 
     constructor(private db: AngularFirestore, public afAuth: AngularFireAuth) {
         mapboxgl.accessToken = environment.mapbox.accessToken
