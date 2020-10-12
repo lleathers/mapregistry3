@@ -112,7 +112,7 @@ export class MapBoxComponent implements OnInit{
           // defines our neighborhood.
           var geohashlast_msd = geohashlast.substring(0, 5);
 
-
+       
           console.log("Printing old hash from user", geohashlast_msd);
           console.log("Printing new neighborhood", ourneighborhood);
 
@@ -166,40 +166,13 @@ export class MapBoxComponent implements OnInit{
            // updatesubscription(geohashlast_msd, ourneighborhood);       
 
 
-          const nextPartition: string = ourneighborhood + "/" + ourneighborhood;
 
-          //const integrate1: string = "theafs.collection<aGeoJson>('neighborhoods/" + eval('nextPartition') + "')"
-          //console.log("ourPartitionService.partitionCollection = ", integrate1)
-
-          //ourPartitionService.partitionsCollection = eval(integrate1) as unknown as AngularFirestoreCollection<GeoJson>; 
-          //ourPartitionService.partitionsCollection = eval(integrate1);  
-          //console.log("PRINT OUT partitionsCollection:", ourPartitionService.partitionsCollection);
-
-/*
-           const integrate1: string = 
-               "ourPartitionService.partitionsCollection = theafs.collection" + "('neighborhoods/" + eval('nextPartition') +  "') as AngularFirestoreCollection<GeoJson>;"
-*/
-
-/*
-           const integrate1: string = 
-               "ourPartitionService.partitionsCollection = theafs.collection<GeoJson>('neighborhoods/" + eval('nextPartition') + "');"
-
-           console.log(integrate1);
-           eval(integrate1);
-*/
-
-
-          // LITERAL TEST
-          //ourPartitionService.partitionsCollection = dbRef.collection('neighborhoods/dr5qg/dr5qg') as AngularFirestoreCollection<GeoJson>;
-          eval("ourPartitionService.partitionsCollection = theafs.collection('neighborhoods/" + nextPartition + "')");
-          console.log("partitionsCollection assignment worked: ", ourPartitionService.partitionsCollection);
-          
+          // we can now define the newest geohash neighborhood called "domain" in PartitionService
+          ourPartitionService.domain = ourneighborhood;
+          ourPartitionService.createPartition();
 
 
 
-          //eval(integrate1).then(response => { ourPartitionService.partitions = response.valueChanges() });
-           
-          ourPartitionService.partitions = ourPartitionService.partitionsCollection.valueChanges();
           var thepartitions = ourPartitionService.partitions
 
           // Now update the marker subscription to the new partition 
@@ -215,7 +188,18 @@ export class MapBoxComponent implements OnInit{
          //IMPORTANT!!!
          //THIS IS THE CODE THAT ENABLES US TO LIMIT OR RESTRICT QUERY ACTIVITY TO THE NEIGHBORHOOD OF USER PUBLISHED MARKER.
          //WITHOUT THIS, PERFORMANCE WILL DEGRADE AS USERS LOAD THE APPLICATION.
- 
+
+
+         // We ensure that when partitionService.domain is not init, the database addressing is consistent.
+         // The database addressing would look like 'neighborhood/domain/domain'. 
+         var colRef = theafs.collection('neighborhoods/init/init')
+         
+             if ((colRef.get()) && (ourPartitionService.domain != "init")) {
+                 ourPartitionService.createPartition()
+                 console.log("Did we fix partitionService, at subscription site?")
+              }
+
+
          thepartitions.subscribe(thepartitions => {
            console.log("MARKERS AGAIN PLEASE:", thepartitions);
            let source = mapRef.getSource('firebase');
@@ -232,11 +216,7 @@ export class MapBoxComponent implements OnInit{
         const collection = ourgeocollection;
         const lastseen = ourmarkerpoint;
  
-        // Timestamp can only be coerced into string by converting to unknown, then to string.
-        // Therefore, consider <type><unknown>(: Timestamp) format below.
-        // timeRef = <string><unknown>firebase.firestore.Timestamp.now();
         // Fortunately, Timestamp does not need to be converted. Firebase recognizes and stores it accordingly.
-
         timeRef = firebase.firestore.Timestamp.now();
 
         // GeoJson mediates 'users' collection, now
@@ -262,11 +242,7 @@ export class MapBoxComponent implements OnInit{
         const collection = ourgeocollection;
         const lastseen = ourmarkerpoint;
 
-        // Timestamp can only be coerced into string by converting to unknown, then to string.
-        // Therefore, consider <type><unknown>(: Timestamp) format below.
-        // timeRef = <string><unknown>firebase.firestore.Timestamp.now();
         // Fortunately, Timestamp does not need to be converted. Firebase recognizes and stores it accordingly.
-
         timeRef = firebase.firestore.Timestamp.now();
  
         // GeoJson mediates 'users' collection, now
@@ -356,10 +332,6 @@ export class MapBoxComponent implements OnInit{
      this.markers = toMapService.markers
      this.partitions = toPartitionService.partitions
  
-     //We ensure query response is restricted to local neighborhood. 
-       //const firestoreRef = this.db.collection('places').doc('dr5rj');
-       //const geoRef = geo.query(firestoreRef); 
- 
      this.initializeMap()
   }
 
@@ -401,22 +373,6 @@ export class MapBoxComponent implements OnInit{
 
       this.markerpoint = geo.point(event.lngLat.lat, event.lngLat.lng)
      
-      //Why are query and distance inaccessible?
-        //const exist = geo.query(this.db.collection('places'))
-        //const exist1 = geo.distance(this.markerpoint, this.markerpoint)
-
- 
-      // Now connecting from Firestore to markers!!
-
-      //const newMarker   = new GeoJson(coordinates, { message: this.message })
-
-      //TESTING -- WRITE TO FIRESTORE -- NOW WORKS SO COMMENT OUT...
-      // updateUserLocation() is meant to manage all user feature data
-      // via GeoJSON.
-      //const newMarker   = new GeoJson(coordinates, { message: "hello, there", geohash: this.markerpoint.hash })
-      //this.mapService.createMarker(newMarker)
-      // ^^^^^^^ COMMENT OUT ^^^^^^^^
-
       // We need a geohash from user chosen point, markerpoint,
       // to locate neighborhood, called hashpoint. 
 
@@ -445,6 +401,19 @@ export class MapBoxComponent implements OnInit{
       // delete former location. Otherwise always
       // update User account with new marker
       // location.
+
+/*
+         // We ensure that when partitionService.domain is not init, the database addressing is consistent.
+         // The database addressing would look like 'neighborhood/domain/domain'. 
+         var theafs = this.afs
+         var colRef = theafs.collection('neighborhoods/init/init')
+
+
+             if ((colRef.get()) && (this.partitionService.domain != "init")) {
+                 this.partitionService.createPartition()
+                 console.log("Did we fix partitionService, at MapOn?")
+              }
+*/
 
       this.updateUserLocation(this.user.uid)
 
@@ -481,30 +450,6 @@ export class MapBoxComponent implements OnInit{
 
      var makeArray = [TESTMarker]
 
-/*
-     this.markers.subscribe(markers => {
-        console.log("MARKERS AGAIN PLEASE:", markers);
-        let data = new FeatureCollection(markers)
-        this.source.setData(data)
-     })
-*/
-
-     this.partitionService.partitions.subscribe(partitions => {
-        console.log("MARKERS AGAIN PLEASE:", partitions);
-        let data = new FeatureCollection(partitions)
-        this.source.setData(data)
-     })
-
-
-     // console.log("MARKERS1 PRINT HERE:", this.markers1);
-
-
-//     this.markers1.subscribe(markers1 => {
-//        console.log("MARKERS1 AGAIN PLEASE:", markers1);
-//        let data = new FeatureCollection(markers1)
-//        this.source.setData(data)
-//     })
-
 
       /// create map layers with realtime data
       this.map.addLayer({
@@ -531,10 +476,6 @@ export class MapBoxComponent implements OnInit{
 
 
   /// Helpers
-
-//  removeMarker(marker) {
-//    this.mapService.removeMarker(marker.$key)
-//  }
 
   flyTo(data: GeoJson) {
     this.map.flyTo({
