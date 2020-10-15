@@ -30,8 +30,6 @@ export class MapBoxComponent implements OnInit{
     constructor(private afs: AngularFirestore, private mapService: MapService, public partitionService: PartitionService, private router: Router) {
     }
 
-  //geo = geofirex.init(firebase)
-
 
   latlngtext: any;
   user: any;
@@ -169,7 +167,7 @@ export class MapBoxComponent implements OnInit{
 
           // we can now define the newest geohash neighborhood called "domain" in PartitionService
           ourPartitionService.domain = ourneighborhood;
-          ourPartitionService.createPartition();
+          ourPartitionService.createPartition(ourPartitionService, ourPartitionService.db);
 
 
 
@@ -195,7 +193,7 @@ export class MapBoxComponent implements OnInit{
          var colRef = theafs.collection('neighborhoods/init/init')
          
              if ((colRef.get()) && (ourPartitionService.domain != "init")) {
-                 ourPartitionService.createPartition()
+                 ourPartitionService.createPartition(ourPartitionService, ourPartitionService.db)
                  console.log("Did we fix partitionService, at subscription site?")
               }
 

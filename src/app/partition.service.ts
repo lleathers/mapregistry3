@@ -19,16 +19,22 @@ export class PartitionService {
 
     public partitionsCollection: AngularFirestoreCollection<GeoJson>;
     public partitions: Observable<GeoJson[]>;
-    public domain: string;
+    public domain: any;
+
+    public dbafs: AngularFirestore;
+
     // domain is the most significant five digits of the neighborhood geohash
 
 
-    constructor(private db: AngularFirestore, public afAuth: AngularFireAuth) {
-        mapboxgl.accessToken = environment.mapbox.accessToken
+    constructor(public db: AngularFirestore, public afAuth: AngularFireAuth) {
+
         //this.domain = this.initPartitions()
         //this.createPartition()
-        this.domain = this.initPartitions()
-        this.createPartition()
+
+
+        this.initPartitions(db)
+
+
         // this.partitionsCollection = db.collection<any>('neighborhoods/init/init')
         // this.partitions = this.partitionsCollection.valueChanges()
     };
@@ -36,18 +42,30 @@ export class PartitionService {
 
 
 
-    createPartition() {
+    createPartition(objref, passtheafdbref: AngularFirestore): void {
 
         console.log("Just launched createPartition!!!")
 
-        var datab = this.db
-        //var nextPartition: string = this.domain + "/" + this.domain
-        var nextPartition: string = "neighborhoods/" + this.domain + "/" + this.domain
+        var theafref: AngularFirestore = passtheafdbref
+
+        var datab = objref.db
+        var dbfs = firebase.firestore()
+
+        var nextPartition: string = "neighborhoods/" + objref.domain + "/" + objref.domain
 
         console.log("nextPartition is : ", nextPartition);
-        console.log("this.domain is : ", this.domain);
+        console.log("this.domain is : ", objref.domain);
  
-        const source = "this.partitionsCollection = datab.collection('" + nextPartition + "') as any"
+//        const source = "objref.partitionsCollection = datab.collection('" + nextPartition + "') as any"
+
+        const source = "objref.partitionsCollection = theafref.collection('" + nextPartition + "') as GeoJson"
+
+//        objref.partitionsCollection = dbfs.collection<GeoJson>('neighborhoods/dr5rq/dr5rq')
+
+
+//        THIS IS THE LINE WE ARE ATTEMPTING TO EXECUTE through eval(result)
+//        objref.partitionsCollection = passtheafdbref.collection<GeoJson>('neighborhoods/dr5rq/dr5rq')
+
 
         //Show us what you have for result
         let resulttest = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS }})
@@ -58,8 +76,8 @@ export class PartitionService {
         console.log("Print out result : ", result)
         eval(result)
 
-        this.partitions = this.partitionsCollection.valueChanges()
-        console.log("partitionsCollection assignment worked: ", this.partitionsCollection)
+        objref.partitions = objref.partitionsCollection.valueChanges()
+        console.log("partitionsCollection assignment worked: ", objref.partitionsCollection)
     }
 
     /// Add or change marker routine
@@ -82,17 +100,20 @@ export class PartitionService {
      } 
   
 
-    initPartitions(): string {
+    public initPartitions(passafdbref: AngularFirestore): string {
         var datab = this.db
         var dbfs = firebase.firestore()
         //domainRef = this.domain
         //let createPartRef = this.createPartition
 
-        var domainRef = this.domain.bind
+        var domainRef = this.domain
 
-        // var partitionRef: void = this.createPartition()
+        var foofoo = this.createPartition
  
         firebase.auth().onAuthStateChanged(function(checkuser) {
+
+          var foo = this
+
           if (checkuser) {
             var isAnonymous = checkuser.isAnonymous
               if (!isAnonymous) {
@@ -109,10 +130,20 @@ export class PartitionService {
 
                       domainRef = geohashlast_msd
 
-		      console.log("2nd time initPartition, is this.domain = null? ", domainRef)
+                      foo.domain = geohashlast_msd
+
+		      console.log("2nd time initPartition, is this.domain = null? ", foo.domain)
                       // createPartRef()
 
-                      return geohashlast_msd
+                      //return geohashlast_msd
+                      //var obj = {
+                      //  bar: function() {
+                      //    var x = (() => this);
+                      //    return x;
+                      //  }
+                      //};
+ 
+                      foofoo(foo, passafdbref) 
 
                       //console.log("We supposedly instantiated a partition")
                       } 
