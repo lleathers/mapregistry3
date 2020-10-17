@@ -21,12 +21,17 @@ export class PartitionService {
     public partitions: Observable<GeoJson[]>;
     public domain: any;
 
+    public initStr: string;
+
     public dbafs: AngularFirestore;
 
     // domain is the most significant five digits of the neighborhood geohash
 
 
     constructor(public db: AngularFirestore, public afAuth: AngularFireAuth) {
+
+        //this.initStr = this.randInitStr(2) 
+        this.initStr = "ce" 
 
         //this.domain = this.initPartitions()
         //this.createPartition()
@@ -40,18 +45,31 @@ export class PartitionService {
     };
 
 
-
+    randInitStr(length): string {
+        var result        = ''
+        var characters    = 'bcdefghjkmnpqrstuvwxyz0123456789'
+        var charactersLength = characters.length
+        for ( var i = 0; i < length; i++ ) {
+           result += characters.charAt(Math.floor(Math.random() * charactersLength))
+        }
+        return result
+    }
 
     createPartition(objref, passtheafdbref: AngularFirestore): void {
 
         console.log("Just launched createPartition!!!")
+
+        //var extra = this.randInitStr(2)
+        //console.log("This is extra: ", extra)
 
         var theafref: AngularFirestore = passtheafdbref
 
         var datab = objref.db
         var dbfs = firebase.firestore()
 
-        var nextPartition: string = "neighborhoods/" + objref.domain + "/" + objref.domain
+        // var nextPartition: string = "neighborhoods/" + objref.domain.substr(0,3) + objref.initStr + "/" + objref.domain.substr(0,3) + objref.initStr 
+        // var nextPartition: string = "neighborhoods/" + objref.domain.substr(0,5) + "/" + objref.domain.substr(0,5)  
+        var nextPartition: string = "neighborhoods/" + objref.domain + "/" + objref.domain  
 
         console.log("nextPartition is : ", nextPartition);
         console.log("this.domain is : ", objref.domain);
@@ -78,13 +96,15 @@ export class PartitionService {
 
         objref.partitions = objref.partitionsCollection.valueChanges()
         console.log("partitionsCollection assignment worked: ", objref.partitionsCollection)
+
+        objref.initStr = ''
     }
 
     /// Add or change marker routine
     /// Each user is authorized to manage the location of only one marker.
 
-    createMarker(data: GeoJson) {
-        var theMarkers = this.partitionsCollection
+    createMarker(data: GeoJson, ourobjref) {
+        var theMarkers = ourobjref.partitionsCollection
         firebase.auth().onAuthStateChanged(function(checkuser) {
           if (checkuser) {
             var isAnonymous = checkuser.isAnonymous

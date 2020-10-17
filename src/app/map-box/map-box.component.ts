@@ -46,8 +46,11 @@ export class MapBoxComponent implements OnInit{
   //lng = -122.41;
   
 
-  lat = 40.62659207716757;
-  lng = -73.96701867575564;
+  //lat = 40.62659207716757;
+  //lng = -73.96701867575564;
+  lat = 40.60659207716757;
+  lng = -73.84701867575564;
+
   x = 0;
 
 
@@ -167,8 +170,12 @@ export class MapBoxComponent implements OnInit{
 
           // we can now define the newest geohash neighborhood called "domain" in PartitionService
           ourPartitionService.domain = ourneighborhood;
-          ourPartitionService.createPartition(ourPartitionService, ourPartitionService.db);
 
+          ourPartitionService.createPartition(ourPartitionService, ourPartitionService.db);
+          // createPartition is being sent the necessary reference object, "ourPartitionService"
+          // because we could not adequately define initPartition and createPartition without
+          // executing these processes as methods from the constructor. There must be a better
+          // way, but I am not yet aware, so please forgive. --Larry Leathers, Oct 16, 2020 
 
 
           var thepartitions = ourPartitionService.partitions
@@ -226,7 +233,7 @@ export class MapBoxComponent implements OnInit{
 ///TESTING to understand what form Firestore can understand
         console.log("PLEASE SHARE GEOJSON:", newMarker1)
         ourMapService.createMarker(newMarker1)
-        ourPartitionService.createMarker(newMarker1)
+        ourPartitionService.createMarker(newMarker1, ourPartitionService)
         
  
         //  collection.setDoc(id, {position: lastseen.data});
@@ -248,7 +255,7 @@ export class MapBoxComponent implements OnInit{
                                 presence: "available", username: "default", timestamp: timeRef, userid: userRef })
                                 
         ourMapService.createMarker(newMarker2)
-        ourPartitionService.createMarker(newMarker2)  
+        ourPartitionService.createMarker(newMarker2, ourPartitionService)  
 
         //  collection.setDoc(id, {position: lastseen.data});
         console.log("Newest neighborhood", ourmarkerpoint.hash);
@@ -355,7 +362,7 @@ export class MapBoxComponent implements OnInit{
     this.map = new mapboxgl.Map({
       container: 'map',
       style: this.style,
-      zoom: 17,
+      zoom: 15,
       center: [this.lng, this.lat]
     });
 
@@ -436,18 +443,14 @@ export class MapBoxComponent implements OnInit{
       /// This JSON is preamble to JSON in features: array
       /// Contents are from database or whatever source.
 
-      /// get source
-      this.source = this.map.getSource('firebase')
 
-      /// subscribe to realtime database and set data source
-
-
+/*
 //TESTING for interface with MapBox API
      var TESTMarker = new GeoJson([-73.9237405202382, 40.61766398344872], { message: "hello, there", geohash: "dr5rhg97w", 
                                 presence: "available", username: "default" })
 
      var makeArray = [TESTMarker]
-
+*/
 
       /// create map layers with realtime data
       this.map.addLayer({
@@ -469,6 +472,7 @@ export class MapBoxComponent implements OnInit{
       })
 
     })
+
 
   }
 
